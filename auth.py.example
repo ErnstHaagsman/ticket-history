@@ -1,0 +1,4 @@
+# Rename this file to auth.py, and substitute your YouTrack credentials before use
+
+username = '<your username>'
+password = '<your password>'
