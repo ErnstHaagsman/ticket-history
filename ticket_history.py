@@ -3,19 +3,13 @@ ticket_id = 'PY-1706'
 
 # Request history XML
 import requests
+import auth
 url = 'https://youtrack.jetbrains.com/rest/issue/{}/history'.format(ticket_id)
-# r = requests.get(url)
-#
-# # Write file
-# with open('downloaded.xml', 'wb') as f:
-#     f.write(r.content)
-#
-# f.close()
+r = requests.get(url, auth=(auth.username,auth.password))
 
 # Load the XML
 import xml.etree.ElementTree as ET
-import urllib
-tree = ET.parse(urllib.request.urlopen(url)).getroot()
+tree = ET.fromstring(r.content)
 
 # each version of the issue is in an 'issue' tag
 from datetime import datetime
@@ -39,20 +33,21 @@ def field_by_name(parent, name):
     # of the list of found fields
     return fields[0]
 
-update = updates[0]
 
-# "Updated" time is in field[name=updated]
-updated_time_field = field_by_name(update, 'updated')
-# The actual value is stored in a 'value' child element
-# with a 'SingleField' like 'updated', there's only one
-# 'value' child element
-updated_time_ms = updated_time_field.find('value').text
+for update in updates:
+    # "Updated" time is in field[name=updated]
+    updated_time_field = field_by_name(update, 'updated')
+    # The actual value is stored in a 'value' child element
+    # with a 'SingleField' like 'updated', there's only one
+    # 'value' child element
+    updated_time_ms = updated_time_field.find('value').text
 
-# get the datetime
-updated = datetime.utcfromtimestamp(ms_to_s(updated_time_ms))
+    # get the datetime
+    updated = datetime.utcfromtimestamp(ms_to_s(updated_time_ms))
 
-voter_name_fields = field_by_name(update, 'voterName')
-voters = [field.text for field in voter_name_fields]
+    voter_name_fields = field_by_name(update, 'voterName')
+    voters = [field.text for field in voter_name_fields]
 
-print(updated)
-print(voters)
+    votes_over_time[updated] = voters
+
+
