@@ -34,6 +34,7 @@ def field_by_name(parent, name):
     return fields[0]
 
 
+# extract updates over time from the XML
 for update in updates:
     # "Updated" time is in field[name=updated]
     updated_time_field = field_by_name(update, 'updated')
