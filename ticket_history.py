@@ -31,24 +31,31 @@ def field_by_name(parent, name):
 
     # Fields names are supposed to be unique, therefore take the 0th element
     # of the list of found fields
+
+    if len(fields) < 1:
+        raise KeyError('Could not find key: ' + name)
+
     return fields[0]
 
 
 # extract updates over time from the XML
 for update in updates:
-    # "Updated" time is in field[name=updated]
-    updated_time_field = field_by_name(update, 'updated')
-    # The actual value is stored in a 'value' child element
-    # with a 'SingleField' like 'updated', there's only one
-    # 'value' child element
-    updated_time_ms = updated_time_field.find('value').text
+    try:
+        # "Updated" time is in field[name=updated]
+        updated_time_field = field_by_name(update, 'updated')
+        # The actual value is stored in a 'value' child element
+        # with a 'SingleField' like 'updated', there's only one
+        # 'value' child element
+        updated_time_ms = updated_time_field.find('value').text
 
-    # get the datetime
-    updated = datetime.utcfromtimestamp(ms_to_s(updated_time_ms))
+        # get the datetime
+        updated = datetime.utcfromtimestamp(ms_to_s(updated_time_ms))
 
-    voter_name_fields = field_by_name(update, 'voterName')
-    voters = [field.text for field in voter_name_fields]
+        voter_name_fields = field_by_name(update, 'voterName')
+        voters = [field.text for field in voter_name_fields]
 
-    votes_over_time[updated] = voters
+        votes_over_time[updated] = voters
+    except KeyError as e:
+        print(e)
 
 
